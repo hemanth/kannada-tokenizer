@@ -2,5 +2,5 @@
 
 from kannada_tokenizer.tokenizer import tokenize
 
-__version__ = "0.1.2"
+__version__ = "0.1.3"
 __all__ = ["tokenize"]

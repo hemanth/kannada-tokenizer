@@ -28,14 +28,20 @@ tokenize("ದೇವಾಲಯದ ಮಹೋತ್ಸವ")
 ```python
 from kannada_tokenizer.sandhi import split_sandhi
 
-split_sandhi("ರಾಮಾಯಣ")
-# ['ರಾಮಾಯಣ']
+split_sandhi("ರಾಮಾಯಣ")    # savarṇa-dīrgha: a + ā → ā
+# ['ರಾಮ', 'ಆಯಣ']
 
-split_sandhi("ಮಹಾಭಾರತ")
-# ['ಮಹಾಭಾರತ']
+split_sandhi("ದೇವಾಲಯ")    # lōpa: a + ā → ā
+# ['ದೇವ', 'ಆಲಯ']
 
-split_sandhi("ಸರ್ವಜ್ಞ")
-# ['ಸರ್ವಜ್ಞ']
+split_sandhi("ವಿದ್ಯಾಲಯ")   # lōpa: a + ā → ā
+# ['ವಿದ್ಯ', 'ಆಲಯ']
+
+split_sandhi("ಸರ್ವಜ್ಞ")    # lōpa: a + a → a
+# ['ಸರ್ವ', 'ಅಜ್ಞ']
+
+split_sandhi("ಕನ್ನಡ")      # no junction found
+# ['ಕನ್ನಡ']
 ```
 
 Accepts Kannada script or ISO 15919 — output script matches input. Rule-based engine covering lōpa sandhi (vowel elision), āgama sandhi (y/v insertion), ādeśa sandhi (guṇa-like substitution), and consonant sandhi (voicing, gemination, nasals).

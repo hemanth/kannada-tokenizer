@@ -505,9 +505,10 @@ def split_sandhi(word: str) -> list[str]:
     # Only accept the split if it scores reasonably well compared to
     # keeping the word intact.  This prevents spurious splits on normal
     # words like 'kannaḍa' where lōpa rules match but the split is
-    # nonsensical.  The 0.8 factor biases toward splitting for IR recall.
+    # nonsensical.  The 0.42 factor allows genuine sandhi splits (which
+    # roughly halve the min-token score) while blocking degenerate ones.
     unsplit_score = _score_candidate([working])
-    if best_score < unsplit_score * 0.8:
+    if best_score < unsplit_score * 0.42:
         return [word]
 
     # Convert back to Kannada script if input was Kannada
