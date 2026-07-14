@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kannada-tokenizer"
+version = "0.1.0"
+description = "Kannada tokenizer with sandhi splitting for Information Retrieval."
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+authors = [{name = "Hemanth HM"}]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Topic :: Text Processing :: Linguistic",
+]
+
+[project.scripts]
+kannada-tokenize = "kannada_tokenizer.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
