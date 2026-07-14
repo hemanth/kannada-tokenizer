@@ -428,7 +428,10 @@ def _score_candidate(parts: list[str]) -> float:
 # ---------------------------------------------------------------------------
 
 def split_sandhi(word: str) -> list[str]:
-    """Split a single ISO 15919-encoded Kannada word at sandhi junctions.
+    """Split a Kannada word at sandhi junctions.
+
+    Accepts both Kannada script and ISO 15919 romanized input.  If the
+    input is in Kannada script, the output will also be in Kannada script.
 
     Uses a rule-based approach: every reverse-sandhi rule is tried at every
     position in the word, candidate splits are scored, and the highest-scoring
@@ -438,30 +441,41 @@ def split_sandhi(word: str) -> list[str]:
     Parameters
     ----------
     word : str
-        A single token in ISO 15919 transliteration.
+        A single token in Kannada script or ISO 15919 transliteration.
 
     Returns
     -------
     list[str]
-        One or more ISO 15919 tokens resulting from the split.  Guaranteed
-        to be non-empty.
+        One or more tokens resulting from the split.  Guaranteed to be
+        non-empty.  Output script matches input script.
 
     Examples
     --------
     >>> split_sandhi("rāmāyana")
     ['rāma', 'āyana']
+    >>> split_sandhi("ರಾಮಾಯಣ")
+    ['ರಾಮ', 'ಆಯಣ']
     >>> split_sandhi("dēvi")        # no split needed (too short / no rule)
     ['dēvi']
     """
+    from .transliterate import is_kannada, kannada_to_iso15919, iso15919_to_kannada
+
     if not word or len(word) <= 1:
         return [word] if word else [""]
 
+    # Auto-detect Kannada script input
+    input_is_kannada = is_kannada(word)
+    if input_is_kannada:
+        working = kannada_to_iso15919(word)
+    else:
+        working = word
+
     # Short words (≤5 chars) are very unlikely to contain a real sandhi
     # junction that splits into two meaningful tokens.
-    if len(word) <= 5:
+    if len(working) <= 5:
         return [word]
 
-    candidates = _generate_candidates(word)
+    candidates = _generate_candidates(working)
 
     if not candidates:
         return [word]
@@ -492,8 +506,13 @@ def split_sandhi(word: str) -> list[str]:
     # keeping the word intact.  This prevents spurious splits on normal
     # words like 'kannaḍa' where lōpa rules match but the split is
     # nonsensical.  The 0.8 factor biases toward splitting for IR recall.
-    unsplit_score = _score_candidate([word])
+    unsplit_score = _score_candidate([working])
     if best_score < unsplit_score * 0.8:
         return [word]
 
+    # Convert back to Kannada script if input was Kannada
+    if input_is_kannada:
+        return [iso15919_to_kannada(t) for t in best]
+
     return best
+
