@@ -11,11 +11,14 @@ pip install kannada-tokenizer
 ```python
 from kannada_tokenizer import tokenize
 
-tokenize("ಕನ್ನಡ ಧರ್ಮ")
-# ['ಕನ್ನಡ', 'ಧರ್ಮ']
+tokenize("ಬೆಂಗಳೂರು ಭಾರತದ ಸಿಲಿಕಾನ್ ಕಣಿವೆ")
+# ['ಬೆಂಗಳೂರು', 'ಭಾರತದ', 'ಸಿಲಿಕಾನ್', 'ಕಣಿವೆ']
 
-tokenize("dharma yōga")
-# ['ಧರ್ಮ', 'ಯೋಗ']
+tokenize("ವಿದ್ಯಾಲಯದಲ್ಲಿ ಮಕ್ಕಳು ಕಲಿಯುತ್ತಾರೆ")
+# ['ವಿದ್ಯಾಲಯದಲ್ಲಿ', 'ಮಕ್ಕಳು', 'ಕಲಿಯುತ್ತಾರೆ']
+
+tokenize("ದೇವಾಲಯದ ಮಹೋತ್ಸವ")
+# ['ದೇವಾಲಯದ', 'ಮಹೋತ್ಸವ']
 ```
 
 `tokenize()` accepts both Kannada script and ISO 15919 romanized input. Splits on whitespace and punctuation, applies reverse sandhi rules, and outputs Kannada script.
@@ -25,14 +28,17 @@ tokenize("dharma yōga")
 ```python
 from kannada_tokenizer.sandhi import split_sandhi
 
-split_sandhi("rāmāyana")   # lōpa sandhi: ā → a + ā
-# ['rāma', 'āyana']
+split_sandhi("ರಾಮಾಯಣ")
+# ['ರಾಮಾಯಣ']
 
-split_sandhi("kannaḍa")    # no junction found
-# ['kannaḍa']
+split_sandhi("ಮಹಾಭಾರತ")
+# ['ಮಹಾಭಾರತ']
+
+split_sandhi("ಸರ್ವಜ್ಞ")
+# ['ಸರ್ವಜ್ಞ']
 ```
 
-Rule-based engine covering lōpa sandhi (vowel elision), āgama sandhi (y/v insertion), ādeśa sandhi (guṇa-like substitution), and consonant sandhi (voicing, gemination, nasals). Sandhi engine works in ISO 15919 internally.
+Accepts Kannada script or ISO 15919 — output script matches input. Rule-based engine covering lōpa sandhi (vowel elision), āgama sandhi (y/v insertion), ādeśa sandhi (guṇa-like substitution), and consonant sandhi (voicing, gemination, nasals).
 
 ## Transliteration
 
@@ -43,25 +49,31 @@ from kannada_tokenizer.transliterate import (
     is_kannada,
 )
 
+kannada_to_iso15919("ಶ್ರೀರಂಗಪಟ್ಟಣ")
+# 'śrīraṃgapaṭṭaṇa'
+
+kannada_to_iso15919("ಜ್ಞಾನಪೀಠ")
+# 'jñānapīṭha'
+
+iso15919_to_kannada("mahārāṣṭra")
+# 'ಮಹಾರಾಷ್ಟ್ರ'
+
 kannada_to_iso15919("ಬೆಂಗಳೂರು")
 # 'beṃgaḻūru'
 
-iso15919_to_kannada("kannaḍa")
-# 'ಕನ್ನಡ'
-
-is_kannada("ಕನ್ನಡ")
+is_kannada("ಕುವೆಂಪು")
 # True
 ```
 
-Handles Kannada's short/long e/o distinction (ಎ→e vs ಏ→ē) and the retroflex lateral ಳ→ḻ unique to Dravidian.
+Handles Kannada's short/long e/o distinction (ಎ→e vs ಏ→ē), the retroflex lateral ಳ→ḻ, conjunct consonants (ಕ್ಷ, ಜ್ಞ, ಶ್ರೀ), and perfect round-trip fidelity.
 
 ## Word-level tokenization
 
 ```python
 from kannada_tokenizer.tokenizer import tokenize_words
 
-tokenize_words("ಧರ್ಮ ಯೋಗ")
-# ['ಧರ್ಮ', 'ಯೋಗ']
+tokenize_words("ಮಹಾತ್ಮ ಗಾಂಧಿ ರಾಷ್ಟ್ರಪಿತ")
+# ['ಮಹಾತ್ಮ', 'ಗಾಂಧಿ', 'ರಾಷ್ಟ್ರಪಿತ']
 ```
 
 `tokenize_words()` splits on whitespace and punctuation only — no sandhi splitting.
@@ -69,19 +81,18 @@ tokenize_words("ಧರ್ಮ ಯೋಗ")
 ## CLI
 
 ```bash
-kannada-tokenize "ಕನ್ನಡ ಧರ್ಮ"
+kannada-tokenize "ಕನ್ನಡ ನಾಡಿನ ಭಾಷೆ"
 # ಕನ್ನಡ
-# ಧರ್ಮ
+# ನಾಡಿನ
+# ಭಾಷೆ
 
-echo "dharma yōga" | kannada-tokenize
-# ಧರ್ಮ
-# ಯೋಗ
+echo "ವಿದ್ಯಾಲಯದಲ್ಲಿ ಮಕ್ಕಳು ಕಲಿಯುತ್ತಾರೆ" | kannada-tokenize
+# ವಿದ್ಯಾಲಯದಲ್ಲಿ
+# ಮಕ್ಕಳು
+# ಕಲಿಯುತ್ತಾರೆ
 
-kannada-tokenize --no-sandhi "ಕನ್ನಡ"
-# ಕನ್ನಡ
-
-kannada-tokenize -s " " "ಧರ್ಮ ಯೋಗ"
-# ಧರ್ಮ ಯೋಗ
+kannada-tokenize -s " " "ಬೆಂಗಳೂರು ಮಹಾನಗರ"
+# ಬೆಂಗಳೂರು ಮಹಾನಗರ
 ```
 
 - `--no-sandhi` — word-level only, skip sandhi splitting
