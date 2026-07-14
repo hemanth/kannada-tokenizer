@@ -12,16 +12,13 @@ pip install kannada-tokenizer
 from kannada_tokenizer import tokenize
 
 tokenize("ಕನ್ನಡ ಧರ್ಮ")
-# ['kannaḍa', 'dharma']
+# ['ಕನ್ನಡ', 'ಧರ್ಮ']
 
-tokenize("vidyālaya")
-# ['vidyālaya']
-
-tokenize("mahōtsava")
-# ['maha', 'ōtsava']
+tokenize("dharma yōga")
+# ['ಧರ್ಮ', 'ಯೋಗ']
 ```
 
-`tokenize()` normalizes to ISO 15919, splits on whitespace and punctuation, then applies reverse sandhi rules. Accepts both Kannada script and romanized input.
+`tokenize()` accepts both Kannada script and ISO 15919 romanized input. Splits on whitespace and punctuation, applies reverse sandhi rules, and outputs Kannada script.
 
 ## Sandhi splitting
 
@@ -35,7 +32,7 @@ split_sandhi("kannaḍa")    # no junction found
 # ['kannaḍa']
 ```
 
-Rule-based engine covering lōpa sandhi (vowel elision), āgama sandhi (y/v insertion), ādeśa sandhi (guṇa-like substitution), and consonant sandhi (voicing, gemination, nasals). Uses longest-match heuristic when splits are ambiguous.
+Rule-based engine covering lōpa sandhi (vowel elision), āgama sandhi (y/v insertion), ādeśa sandhi (guṇa-like substitution), and consonant sandhi (voicing, gemination, nasals). Sandhi engine works in ISO 15919 internally.
 
 ## Transliteration
 
@@ -63,8 +60,8 @@ Handles Kannada's short/long e/o distinction (ಎ→e vs ಏ→ē) and the retro
 ```python
 from kannada_tokenizer.tokenizer import tokenize_words
 
-tokenize_words("vidyālaya namaḥ")
-# ['vidyālaya', 'namaḥ']
+tokenize_words("ಧರ್ಮ ಯೋಗ")
+# ['ಧರ್ಮ', 'ಯೋಗ']
 ```
 
 `tokenize_words()` splits on whitespace and punctuation only — no sandhi splitting.
@@ -73,17 +70,18 @@ tokenize_words("vidyālaya namaḥ")
 
 ```bash
 kannada-tokenize "ಕನ್ನಡ ಧರ್ಮ"
-# kannaḍa
-# dharma
+# ಕನ್ನಡ
+# ಧರ್ಮ
 
-echo "vidyālaya" | kannada-tokenize
-# vidyālaya
+echo "dharma yōga" | kannada-tokenize
+# ಧರ್ಮ
+# ಯೋಗ
 
-kannada-tokenize --no-sandhi "mahōtsava"
-# mahōtsava
+kannada-tokenize --no-sandhi "ಕನ್ನಡ"
+# ಕನ್ನಡ
 
-kannada-tokenize -s " " "dharma yōga"
-# dharma yōga
+kannada-tokenize -s " " "ಧರ್ಮ ಯೋಗ"
+# ಧರ್ಮ ಯೋಗ
 ```
 
 - `--no-sandhi` — word-level only, skip sandhi splitting

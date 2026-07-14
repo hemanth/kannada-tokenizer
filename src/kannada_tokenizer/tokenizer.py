@@ -2,13 +2,16 @@
 
 Mirrors the Sanskrit tokenizer architecture, adapted for Kannada script
 (Unicode block U+0C80–U+0CFF) and ISO 15919 transliteration.
+
+Internally normalizes to ISO 15919 for sandhi splitting, then converts
+output back to Kannada script.
 """
 
 from __future__ import annotations
 
 import re
 
-from .transliterate import normalize_to_iso15919
+from .transliterate import normalize_to_iso15919, iso15919_to_kannada
 from .sandhi import split_sandhi
 
 
@@ -20,19 +23,19 @@ _SPLIT_PATTERN = re.compile(
 
 
 def tokenize(text: str) -> list[str]:
-    """Tokenize Kannada text with transliteration normalization and sandhi splitting.
+    """Tokenize Kannada text with sandhi splitting.
 
     Pipeline:
-        1. Normalize input to ISO 15919.
+        1. Normalize input to ISO 15919 (internal working form).
         2. Split on whitespace and punctuation (dandas, periods, commas, etc.).
         3. Attempt sandhi splitting on each word.
-        4. Lowercase all tokens and filter empties.
+        4. Convert tokens back to Kannada script.
 
     Args:
-        text: Input Kannada text in any supported script/transliteration.
+        text: Input Kannada text (Kannada script or ISO 15919).
 
     Returns:
-        A flat list of lowercase token strings.
+        A flat list of Kannada-script token strings.
     """
     if not text or not text.strip():
         return []
@@ -49,8 +52,8 @@ def tokenize(text: str) -> list[str]:
         sub_tokens: list[str] = split_sandhi(word)
         tokens.extend(sub_tokens)
 
-    # Lowercase and final empty filter
-    return [t.lower() for t in tokens if t.strip()]
+    # Convert back to Kannada script and filter empties
+    return [iso15919_to_kannada(t) for t in tokens if t.strip()]
 
 
 def tokenize_words(text: str) -> list[str]:
@@ -60,10 +63,10 @@ def tokenize_words(text: str) -> list[str]:
     pre-split text.
 
     Args:
-        text: Input Kannada text in any supported script/transliteration.
+        text: Input Kannada text (Kannada script or ISO 15919).
 
     Returns:
-        A flat list of lowercase word-level tokens.
+        A flat list of Kannada-script word-level tokens.
     """
     if not text or not text.strip():
         return []
@@ -71,4 +74,5 @@ def tokenize_words(text: str) -> list[str]:
     normalized: str = normalize_to_iso15919(text)
     raw_words: list[str] = _SPLIT_PATTERN.split(normalized)
 
-    return [w.lower() for w in raw_words if w.strip()]
+    return [iso15919_to_kannada(w) for w in raw_words if w.strip()]
+
